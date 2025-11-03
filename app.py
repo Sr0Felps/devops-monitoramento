@@ -6,7 +6,7 @@ from prometheus_client import Counter
 
 app = Flask(__name__)
 
-metrics = PrometheusMetrics(app)
+metrics = PrometheusMetrics(app, export_defaults=True)
 
 links_criados_total = Counter('links_criados_total', 'Total de novos links encurtados criados.')
 redirecionamentos_total = Counter('redirecionamentos_total', 'Total de links redirecionados.')
