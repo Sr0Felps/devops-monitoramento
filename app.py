@@ -6,11 +6,14 @@ from prometheus_client import Counter
 
 app = Flask(__name__)
 
+# Configuração final para garantir que todas as métricas (customizadas e automáticas) sejam exportadas.
 metrics = PrometheusMetrics(app, export_defaults=True)
 
+# Métricas customizadas de negócio
 links_criados_total = Counter('links_criados_total', 'Total de novos links encurtados criados.')
 redirecionamentos_total = Counter('redirecionamentos_total', 'Total de links redirecionados.')
 
+# Nosso "banco de dados" em memória
 url_db = {}
 
 def gerar_codigo_curto(tamanho=6):
@@ -26,11 +29,13 @@ def encurtar_url():
     url_longa = dados['url_longa']
     codigo_curto = gerar_codigo_curto()
     
+    # Garante que o código curto é único
     while codigo_curto in url_db:
         codigo_curto = gerar_codigo_curto()
         
     url_db[codigo_curto] = url_longa
     
+    # Incrementa métrica de negócio
     links_criados_total.inc()
     
     return jsonify({
@@ -40,12 +45,16 @@ def encurtar_url():
 
 @app.route('/<string:codigo_curto>', methods=['GET'])
 def direcionar(codigo_curto):
+    # Procura no "banco de dados"
     url_longa = url_db.get(codigo_curto)
     
     if url_longa:
+        # Incrementa métrica de negócio
         redirecionamentos_total.inc()
+        # Faz o redirecionamento (retorna 302)
         return redirect(url_longa, code=302)
     else:
+        # Retorna o erro 404
         return jsonify({"erro": "URL curta não encontrada"}), 404
 
 @app.route('/api/links', methods=['GET'])
