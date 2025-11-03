@@ -1,0 +1,9 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'flask-url-shortener'
+    metrics_path: '/metrics' # O endpoint padrão do prometheus-flask-exporter
+    static_configs:
+      # host.docker.internal aponta para o host da máquina (onde o Flask está rodando)
+      - targets: ['host.docker.internal:5000']
